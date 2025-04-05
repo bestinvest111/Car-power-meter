@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pay for Car Power Meter</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <script>Pi.init({ version: "2.0" });</script>
+</head>
+<body>
+  <h1>Pay 6 Pi for Car Power Meter</h1>
+  <p>Click below to pay 6 Pi. You’ll get a confirmation after payment.</p>
+  <button onclick="startPayment()">Pay 6 Pi</button>
+  <script>
+    async function startPayment() {
+      try {
+        const user = await Pi.authenticate(['payments'], (user) => {
+          console.log("Authenticated user:", user);
+        });
+
+        Pi.createPayment({
+          amount: 6, // 6 Pi
+          memo: "Purchase of Car Power Meter",
+          metadata: { item: "Car Power Meter" } // Required metadata
+        }, {
+          onReadyForServerApproval: (paymentId) => {
+            console.log("Payment ID:", paymentId);
+          },
+          onReadyForServerCompletion: (paymentId, txid) => {
+            alert("Payment successful! Transaction ID: " + txid);
+          },
+          onCancel: () => {
+            alert("Payment cancelled.");
+            window.location.href = encodeURIComponent("https://bit.ly/3FQLZCz");
+          },
+          onError: (error) => {
+            alert("Payment failed: " + error.message);
+            window.location.href = encodeURIComponent("https://bit.ly/3FQLZCz");
+          }
+        });
+      } catch (err) {
+        alert("Authentication failed: " + err.message);
+        window.location.href = encodeURIComponent("https://bit.ly/3FQLZCz");
+      }
+    }
+  </script>
+</body>
+</html>
