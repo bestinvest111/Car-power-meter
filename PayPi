@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pay for Car Power Meter</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <script>Pi.init({ version: "2.0" });</script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Pay 6 Pi for Car Power Meter</h1>
+  <p>Click below to pay 6 Pi. You’ll get a confirmation and APK download after payment.</p>
+  <button onclick="startPayment()">Pay 6 Pi</button>
+  <script>
+    async function startPayment() {
+      try {
+        const user = await Pi.authenticate(['payments'], (user) => {
+          console.log("Authenticated user:", user);
+        });
+        Pi.createPayment({
+          amount: 6,
+          memo: "Purchase of Car Power Meter",
+          metadata: { item: "Car Power Meter" }
+        }, {
+          onReadyForServerApproval: (paymentId) => {
+            console.log("Payment ID:", paymentId);
+          },
+          onReadyForServerCompletion: (paymentId, txid) => {
+            alert("Payment successful! Transaction ID: " + txid + ". Downloading APK...");
+            window.location.href = "https://yourdomain.com/path/to/yourfile.apk"; // Replace with APK URL
+          },
+          onCancel: () => {
+            alert("Payment cancelled.");
+            setTimeout(() => { window.location.href = "https://bit.ly/3FQLZCz"; }, 2000);
+          },
+          onError: (error) => {
+            console.error("Payment error:", error);
+            alert("Payment failed: " + error.message);
+            setTimeout(() => { window.location.href = "https://bit.ly/3FQLZCz"; }, 2000);
+          }
+        });
+      } catch (err) {
+        alert("Authentication failed: " + err.message);
+        setTimeout(() => { window.location.href = "https://bit.ly/3FQLZCz"; }, 2000);
+      }
+    }
+  </script>
+</body>
+</html>
