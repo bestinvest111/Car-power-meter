@@ -3,7 +3,6 @@
 <head>
   <title>Pay for Car Power Meter</title>
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  <script>Pi.init({ version: "2.0" });</script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,42 +20,73 @@
   <h1>Pay 6 Pi for Car Power Meter</h1>
   <p>Click below to pay 6 Pi. You’ll get a confirmation after payment.</p>
   <button onclick="startPayment()">Pay 6 Pi</button>
-  <script>
-    async function startPayment() {
-      try {
-        const user = await Pi.authenticate(['payments'], (user) => {
-          console.log("Authenticated user:", user);
-        });
 
-        Pi.createPayment({
-          amount: 6, // 6 Pi
-          memo: "Purchase of Car Power Meter",
-          metadata: { item: "Car Power Meter" }
-        }, {
-          onReadyForServerApproval: (paymentId) => {
-            console.log("Payment ID:", paymentId);
-          },
-          onReadyForServerCompletion: (paymentId, txid) => {
-            alert("Payment successful! Transaction ID: " + txid);
-          },
-          onCancel: () => {
-            alert("Payment cancelled.");
-            setTimeout(() => {
-              window.location.href = "https://bestinvest111.github.io/Cpm";
-            }, 2000);
-          },
-          onError: (error) => {
-            console.error("Payment error:", error);
-            alert("Payment failed: " + error.message);
-            setTimeout(() => {
-              window.location.href = "https://bestinvest111.github.io/Cpm";
-            }, 2000);
-          }
+  <script>
+    // Wait for the Pi SDK to load before initializing
+    window.addEventListener('load', () => {
+      if (typeof Pi === 'undefined') {
+        alert('Pi SDK failed to load. Please check your network or the Pi Browser.');
+        return;
+      }
+      Pi.init({ version: "2.0", sandbox: true }); // Enable sandbox mode for testing
+      console.log('Pi SDK initialized');
+    });
+
+    async function startPayment() {
+      // Check if Pi is available
+      if (typeof Pi === 'undefined') {
+        alert('Pi SDK is not available. Please use the Pi Browser.');
+        return;
+      }
+
+      try {
+        // Step 1: Authenticate the user
+        const authResult = await Pi.authenticate(['username', 'payments'], (incompletePayment) => {
+          console.log('Incomplete payment found:', incompletePayment);
+          // Optionally handle incomplete payments here
         });
+        console.log('Authenticated user:', authResult);
+
+        // Step 2: Create the payment
+        const payment = await Pi.createPayment(
+          {
+            amount: 6, // 6 Pi
+            memo: 'Purchase of Car Power Meter',
+            metadata: { item: 'Car Power Meter' }
+          },
+          {
+            onReadyForServerApproval: (paymentId) => {
+              console.log('Payment ready for approval. Payment ID:', paymentId);
+              // Normally, you'd send this to your backend for approval
+              alert('Payment initiated. Awaiting approval...');
+            },
+            onReadyForServerCompletion: (paymentId, txid) => {
+              console.log('Payment completed. Payment ID:', paymentId, 'Transaction ID:', txid);
+              alert('Payment successful! Transaction ID: ' + txid);
+            },
+            onCancel: (paymentId) => {
+              console.log('Payment cancelled. Payment ID:', paymentId);
+              alert('Payment cancelled.');
+              setTimeout(() => {
+                window.location.href = 'https://bestinvest111.github.io/Cpm';
+              }, 2000);
+            },
+            onError: (error, payment) => {
+              console.error('Payment error:', error);
+              if (payment) console.log('Payment details:', payment);
+              alert('Payment failed: ' + error.message);
+              setTimeout(() => {
+                window.location.href = 'https://bestinvest111.github.io/Cpm';
+              }, 2000);
+            }
+          }
+        );
+        console.log('Payment created:', payment);
       } catch (err) {
-        alert("Authentication failed: " + err.message);
+        console.error('Error during payment process:', err);
+        alert('Payment process failed: ' + err.message);
         setTimeout(() => {
-          window.location.href = "https://bestinvest111.github.io/Cpm";
+          window.location.href = 'https://bestinvest111.github.io/Cpm';
         }, 2000);
       }
     }
